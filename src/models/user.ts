@@ -4,9 +4,9 @@ const bcrypt = require('bcryptjs')
 
 export interface User {
     id: number
-    phoneNumber: number | string
+    userName: string
     password: string
-    token: string
+    tokens: [token: String]
 }
 
 const userSchema = new mongoose.Schema({
@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    phoneNumber: {
+    userName: {
         type: Number,
         required: true,
         trim: true
@@ -41,15 +41,12 @@ userSchema.methods.generateAuth = async function () {
     const user = this
     const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET)
 
-    user.tokens = user.tokens.concat({ token })
+    user.tokens = user.tokens.concat({ token: String })
     await user.save()
     return token
 }
-userSchema.statics.findByCredentials = async (
-    phoneNumber: Number,
-    password: String
-) => {
-    const user = await User.findOne({ phoneNumber })
+userSchema.statics.findByCreds = async (userName: Number, password: String) => {
+    const user = await User.findOne({ userName: String })
 
     if (!user) {
         throw new Error('Unable to login')
